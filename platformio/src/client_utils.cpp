@@ -64,19 +64,19 @@ wl_status_t startWiFi(int &wifiRSSI)
   // timeout if WiFi does not connect in WIFI_TIMEOUT ms from now
   unsigned long timeout = millis() + WIFI_TIMEOUT;
   wl_status_t connection_status = WiFi.status();
-
+ 
   while ((connection_status != WL_CONNECTED) && (millis() < timeout))
   {
     Serial.print(".");
-    delay(50);
+    delay(500);
     connection_status = WiFi.status();
   }
-  Serial.println();
+  Serial.println(" CONNECTED");
 
   if (connection_status == WL_CONNECTED)
   {
     wifiRSSI = WiFi.RSSI(); // get WiFi signal strength now, because the WiFi
-                            // will be turned off to save power!
+                              // will be turned off to save power!
     Serial.println("IP: " + WiFi.localIP().toString());
   }
   else
@@ -121,12 +121,12 @@ bool waitForSNTPSync(tm *timeInfo)
 {
   // Wait for SNTP synchronization to complete
   unsigned long timeout = millis() + NTP_TIMEOUT;
-  if ((sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET)
+  if ((sntp_get_sync_status() != SNTP_SYNC_STATUS_COMPLETED)
       && (millis() < timeout))
   {
     Serial.print(TXT_WAITING_FOR_SNTP);
     delay(100); // ms
-    while ((sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET)
+    while ((sntp_get_sync_status() != SNTP_SYNC_STATUS_COMPLETED)
         && (millis() < timeout))
     {
       Serial.print(".");
@@ -136,6 +136,7 @@ bool waitForSNTPSync(tm *timeInfo)
   }
   return printLocalTime(timeInfo);
 } // waitForSNTPSync
+
 
 /* Perform an HTTP GET request to OpenWeatherMap's "One Call" API
  * If data is received, it will be parsed and stored in the global variable
